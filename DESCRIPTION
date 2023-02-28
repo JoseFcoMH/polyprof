@@ -1,0 +1,13 @@
+Package: polyprof
+Type: Package
+Title: Easier analysis of polysome profiles (usually)
+Version: 0.1.0
+Authors@R: person("José Francisco", "Martínez Hernández", , "jfmh@sund.ku.dk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-3457-2088"))
+Maintainer: <jfmh@sund.ku.dk>
+Description: Some functions which just make it easier to format polysome profiles for their visulization, and some which can aid in their analysis. Some functions assume that the profiles have `Position (mm)` and `Absorbance` columns.
+License: use_mit_license()
+Encoding: UTF-8
+LazyData: true
+Depends: 
+    R (>= 2.10)
