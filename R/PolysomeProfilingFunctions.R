@@ -7,7 +7,7 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
     filter(`Position(mm)` > pos_start) %>%
     filter(`Position(mm)` < pos_end) %>%
     mutate(`Position(mm)` = `Position(mm)` + pos_offset) %>%
-    mutate(Absorbance = Absorbance + abs(min(Absorbance)))
+    mutate(Absorbance = Absorbance - min(Absorbance))
 
   dtAbs <- abs(dtf2$Absorbance[1:length(dtf2$Absorbance)-1] - dtf2$Absorbance[2:length(dtf2$Absorbance)])
   dtf2$dAbs <- append(dtAbs, 0)
