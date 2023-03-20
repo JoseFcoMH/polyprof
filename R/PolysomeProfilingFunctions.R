@@ -6,17 +6,18 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
   dtf2 <- dtf %>%
     filter(`Position(mm)` > pos_start) %>%
     filter(`Position(mm)` < pos_end) %>%
-    mutate(`Position(mm)` = `Position(mm)` + pos_offset) %>%
-    mutate(Absorbance = Absorbance - min(Absorbance))
+    mutate(`Position(mm)` = `Position(mm)` + pos_offset)
 
   dtAbs <- abs(dtf2$Absorbance[1:length(dtf2$Absorbance)-1] - dtf2$Absorbance[2:length(dtf2$Absorbance)])
   dtf2$dAbs <- append(dtAbs, 0)
   dtf2 <- dtf2 %>%
-    filter(dtf2$dAbs < max_jump)
+    filter(dtf2$dAbs < max_jump) %>%
+    mutate(Absorbance = Absorbance - min(Absorbance))
 
   if(smoothen){
     fit.abs <- smooth.spline(x = dtf2$`Position(mm)`, y = dtf2$Absorbance, df = 100)
     dtf2$Absorbance <- predict(fit.abs, x = dtf2$`Position(mm)`)$y
+    dtf2 <- dtf2 %>% mutate(Absorbance = Absorbance - min(Absorbance))
   }
 
   if(to == '80S'){
