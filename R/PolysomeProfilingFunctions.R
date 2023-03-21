@@ -68,28 +68,63 @@ align <- function(ref, other, span = seq(-250, 250, 1), return_plot=FALSE,
   return(other)
 }
 
-PolyMonoRatio <- function(dtf, mono_start=29, mono_end=37, poly_start=mono_end, poly_end=60, show_cutoffs=TRUE){
-  dtf_mono <- dtf %>%
-    filter(`Position(mm)` > mono_start & `Position(mm)` < mono_end)
-  dtf_poly <- dtf %>%
-    filter(`Position(mm)` > poly_start & `Position(mm)` < poly_end)
+PolyMonoRatio <- function(dtf, mono_start=29, mono_end=37, poly_start=mono_end, poly_end=60, show_cutoffs=TRUE, adjust_baseline=FALSE){
 
   if(show_cutoffs){
     p <- ggplot(dtf, mapping = aes(x = `Position(mm)`, y = Absorbance)) +
       geom_line(size = 0.6) +
-      geom_hline(yintercept = 0, color = 'black') +
       geom_vline(xintercept = mono_start, color = 'red') +
       geom_vline(xintercept = mono_end, color = 'red') +
       geom_vline(xintercept = poly_start, color = 'blue') +
       geom_vline(xintercept = poly_end, color = 'blue') +
       theme_bw()
+    }
 
-    print(p)
+  if(adjust_baseline){
+
+    monos <- peak_area(dtf, start_pos = mono_start, end_pos = mono_end)
+    polys <- peak_area(dtf, start_pos = poly_start, end_pos = poly_end)
+
+    if(show_cutoffs){
+      print(p + monos[2] + polys[2])
+    }
+
+    return(polys[[1]] / monos[[1]])
+  }
+
+  dtf_mono <- dtf %>%
+    filter(`Position(mm)` > mono_start & `Position(mm)` < mono_end)
+  dtf_poly <- dtf %>%
+    filter(`Position(mm)` > poly_start & `Position(mm)` < poly_end)
+
+  fit_poly1 <- head(poly_abs, n = nrow(poly_abs)%/%2)
+  fit_poly2 <- tail(poly_abs, n = nrow(poly_abs)%/%2)
+  fit_poly_abs <- lm(c(fit_poly1$Absorbance, fit_poly2$Absorbance) ~ c(fit_poly1$`Position(mm)`, fit_poly2$`Position(mm)`))
+
+  if(show_cutoffs){
+    print(p + geom_hline(yintercept = 0, color = 'black'))
   }
 
   return(trapz(dtf_poly$`Position(mm)`, dtf_poly$Absorbance) /
            trapz(dtf_mono$`Position(mm)`, dtf_mono$Absorbance))
 }
+
+
+peak_area <- function(dtf, start_pos=29, end_pos=37){
+
+  poly_abs <- subset(dt, `Position(mm)` > start_pos & `Position(mm)` < end_pos)
+  fit_poly <- subset(poly_abs, Absorbance == min(Absorbance[1:length(Absorbance)%/%5]) |
+                       Absorbance == min(Absorbance[(length(Absorbance)%/%2 + 1):length(Absorbance)]))
+  fit_poly_abs <- lm(Absorbance ~`Position(mm)`, data = fit_poly)
+
+  poly_abs$Absorbance2 <- poly_abs$Absorbance - predict(fit_poly_abs, newdata = poly_abs)
+  poly_abs$Absorbance2[poly_abs$Absorbance2 < 0] <- 0
+
+  prof_baseline <- geom_line(data = poly_abs, aes(x = `Position(mm)`, y = predict(fit_poly_abs, newdata = poly_abs)), color = 'green')
+
+  return(c(trapz(poly_abs$`Position(mm)`, poly_abs$Absorbance2), prof_baseline))
+}
+
 
 ProfLoader <- function(excel_path, excel_sheet, excel_range, prof_path, prof_pattern, output_as = 'list'){
 
