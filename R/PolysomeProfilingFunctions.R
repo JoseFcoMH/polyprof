@@ -17,7 +17,7 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
   if(smoothen){
     fit.abs <- smooth.spline(x = dtf2$`Position(mm)`, y = dtf2$Absorbance, df = 100)
     dtf2$Absorbance <- predict(fit.abs, x = dtf2$`Position(mm)`)$y
-    dtf2 <- dtf2 %>% mutate(Absorbance = Absorbance - min(Absorbance))
+    dtf2 <- dtf2 %>% mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
   }
 
   if(to == '80S'){
