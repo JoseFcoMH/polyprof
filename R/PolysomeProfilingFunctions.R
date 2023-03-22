@@ -1,7 +1,7 @@
 normalize <- function(dtf, max_abs = Inf, pos_start = 7,
                       pos_end = 60, pos_offset = 0,
                       to = 'AUC', max_jump = Inf,
-                      smoothen = TRUE){
+                      smoothen = TRUE, zero_baseline = TRUE){
 
   dtf2 <- dtf %>%
     filter(`Position(mm)` > pos_start) %>%
@@ -12,7 +12,7 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
   dtf2$dAbs <- append(dtAbs, 0)
   dtf2 <- dtf2 %>%
     filter(dtf2$dAbs < max_jump) %>%
-    mutate(Absorbance = Absorbance - min(Absorbance))
+    mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
 
   if(smoothen){
     fit.abs <- smooth.spline(x = dtf2$`Position(mm)`, y = dtf2$Absorbance, df = 100)
