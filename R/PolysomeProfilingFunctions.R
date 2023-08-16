@@ -1,5 +1,5 @@
 normalize <- function(dtf, max_abs = Inf, pos_start = 7,
-                      pos_end = 60, pos_offset = 0,
+                      pos_end = 67, pos_offset = 0,
                       to = 'AUC', max_jump = Inf,
                       smoothen = TRUE, zero_baseline = TRUE){
 
@@ -59,7 +59,7 @@ calc_offset <- function(ref, other, span = seq(-250, 250, 1), return_plot=FALSE,
 }
 
 align <- function(ref, other, span = seq(-250, 250, 1), return_plot=FALSE,
-                  ref_start = 270, ref_end = 940, by_peaks = TRUE, npeaks = 4, show_peaks = FALSE, minPeakPos = 15, maxPeakPos = 70){
+                  ref_start = 270, ref_end = 940, by_peaks = TRUE, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46){
   if(by_peaks){
     other$`Position(mm)` <- other$`Position(mm)` - mean(peak_finder(other, npeaks, show_peaks, minPeakPos, maxPeakPos)$`Position(mm)` - peak_finder(ref, npeaks, show_peaks, minPeakPos, maxPeakPos)$`Position(mm)`)
   }else{
@@ -164,7 +164,7 @@ PrismExport <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Absor
 }
 
 
-peak_finder <- function(dtf, npeaks = 4, show_peaks = FALSE, minPeakPos = 15, maxPeakPos = 70){
+peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46){
   tst1 <- dtf
   fit.abs <- smooth.spline(x = tst1$`Position(mm)`, y = tst1$Absorbance, df = 50)
   tst1$Absorbance <- predict(fit.abs, x = tst1$`Position(mm)`)$y
@@ -177,6 +177,7 @@ peak_finder <- function(dtf, npeaks = 4, show_peaks = FALSE, minPeakPos = 15, ma
   good_peaks <- peaks %>%
     filter(pos > minPeakPos, pos < maxPeakPos) %>%
     rename(absorb = X1) %>%
+    order(absorb, decreasing = TRUE) %>%
     slice_head(n = npeaks)
 
   peaks$good <- do.call(paste0, peaks) %in% do.call(paste0, good_peaks)
@@ -185,6 +186,8 @@ peak_finder <- function(dtf, npeaks = 4, show_peaks = FALSE, minPeakPos = 15, ma
     p <- ggplot(data = tst1, aes(x = `Position(mm)`, y = Absorbance)) +
       geom_line() +
       geom_point(data = peaks, aes(x = pos, y = X1, color = good), size = 3) +
+      geom_text(data = peaks, aes(x = pos, y = X1),
+                aes(label = paste(round(pos,2), round(X1, 2), sep = ', '))) +
       theme_bw()
     print(p)
   }
