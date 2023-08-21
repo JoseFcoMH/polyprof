@@ -145,7 +145,7 @@ ProfLoader <- function(excel_path, excel_sheet, excel_range, prof_path, prof_pat
 }
 
 
-PrismExport <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Absorbance'), mode = 'percentage'){
+PrismExport2 <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Absorbance'), mode = 'percentage'){
 
   to_exp <- dtf
 
@@ -159,6 +159,10 @@ PrismExport <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Absor
     select(c('Position(mm)', wider_names, wider_vals)) %>%
     pivot_wider(names_from = wider_names, values_from = wider_vals) %>%
     arrange(`Position(mm)`)
+
+  for (v in colnames(to_exp)){
+    to_exp[v] <- as.numeric(as.character(unlist(to_exp[v], recursive = FALSE)))
+  }
 
   return(to_exp)
 }
