@@ -164,7 +164,7 @@ PrismExport <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Absor
 }
 
 
-peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46){
+peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46, minAbs = 0){
   tst1 <- dtf
   fit.abs <- smooth.spline(x = tst1$`Position(mm)`, y = tst1$Absorbance, df = 50)
   tst1$Absorbance <- predict(fit.abs, x = tst1$`Position(mm)`)$y
@@ -175,9 +175,8 @@ peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, ma
   peaks$pos <- tst1$`Position(mm)`[peaks$X2]
 
   good_peaks <- peaks %>%
-    filter(pos > minPeakPos, pos < maxPeakPos) %>%
+    filter(pos > minPeakPos, pos < maxPeakPos, X1 > minAbs) %>%
     rename(absorb = X1) %>%
-    order(absorb, decreasing = TRUE) %>%
     slice_head(n = npeaks)
 
   peaks$good <- do.call(paste0, peaks) %in% do.call(paste0, good_peaks)
