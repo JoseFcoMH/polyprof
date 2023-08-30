@@ -97,10 +97,6 @@ PolyMonoRatio <- function(dtf, mono_start=29, mono_end=37, poly_start=mono_end, 
   dtf_poly <- dtf %>%
     filter(`Position(mm)` > poly_start & `Position(mm)` < poly_end)
 
-  fit_poly1 <- head(poly_abs, n = nrow(poly_abs)%/%2)
-  fit_poly2 <- tail(poly_abs, n = nrow(poly_abs)%/%2)
-  fit_poly_abs <- lm(c(fit_poly1$Absorbance, fit_poly2$Absorbance) ~ c(fit_poly1$`Position(mm)`, fit_poly2$`Position(mm)`))
-
   if(show_cutoffs){
     print(p + geom_hline(yintercept = 0, color = 'black'))
   }
@@ -112,7 +108,7 @@ PolyMonoRatio <- function(dtf, mono_start=29, mono_end=37, poly_start=mono_end, 
 
 peak_area <- function(dtf, start_pos=29, end_pos=37){
 
-  poly_abs <- subset(dt, `Position(mm)` > start_pos & `Position(mm)` < end_pos)
+  poly_abs <- subset(dtf, `Position(mm)` > start_pos & `Position(mm)` < end_pos)
   fit_poly <- subset(poly_abs, Absorbance == min(Absorbance[1:length(Absorbance)%/%5]) |
                        Absorbance == min(Absorbance[(length(Absorbance)%/%2 + 1):length(Absorbance)]))
   fit_poly_abs <- lm(Absorbance ~`Position(mm)`, data = fit_poly)
