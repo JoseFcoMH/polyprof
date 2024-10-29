@@ -166,7 +166,7 @@ PrismExport2 <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Abso
 
 peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46, minAbs = 0){
   tst1 <- dtf
-  fit.abs <- smooth.spline(x = tst1$`Position(mm)`, y = tst1$Absorbance, df = 50)
+  fit.abs <- smooth.spline(x = tst1$`Position(mm)`, y = tst1$Absorbance, df = 100)
   tst1$Absorbance <- predict(fit.abs, x = tst1$`Position(mm)`)$y
 
   tst1$Absorbance <- tst1$Absorbance + abs(min(tst1$Absorbance))
