@@ -178,7 +178,7 @@ peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, ma
   k <- gaussian_kernel()
   tst1$Absorbance <- stats::filter(tst1$Absorbance, k, sides = 2)
   tst1 <- tst1 %>%
-    mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
+    mutate(Absorbance = Absorbance - min(Absorbance))
   peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}', sortstr=TRUE)
   
   if (!is.null(peaks) && nrow(peaks) > 0) {
