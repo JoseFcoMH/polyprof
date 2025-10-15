@@ -23,9 +23,9 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
 if (smoothen) {
   k <- gaussian_kernel()
   dtf2$Absorbance <- stats::filter(dtf2$Absorbance, k, sides = 2)
-  
   dtf2 <- dtf2 %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
+  dtf2$Absorbance[is.na(dtf2$Absorbance)] <- 0
 }
 
 
@@ -177,9 +177,10 @@ peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, ma
   tst1 <- dtf
   k <- gaussian_kernel()
   tst1$Absorbance <- stats::filter(tst1$Absorbance, k, sides = 2)
+  tst1$Absorbance[is.na(tst1$Absorbance)] <- 0
   tst1 <- tst1 %>%
     mutate(Absorbance = Absorbance - min(Absorbance))
-  peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}', sortstr=TRUE)
+  peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}')
   
   if (!is.null(peaks) && nrow(peaks) > 0) {
     peaks <- data.frame(peaks)
