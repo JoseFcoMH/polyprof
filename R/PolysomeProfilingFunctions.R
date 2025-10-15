@@ -21,10 +21,11 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
 
 if (smoothen) {
+  min_absorbance = min(dtf2$Absorbance)
   k <- gaussian_kernel()
   dtf2$Absorbance <- as.numeric(stats::filter(dtf2$Absorbance, k, sides = 2))
   dtf2 <- dtf2 %>%
-    mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
+    mutate(Absorbance = Absorbance - min_absorbance * zero_baseline)
   dtf2$Absorbance[is.na(dtf2$Absorbance)] <- 0
 }
 
@@ -199,9 +200,8 @@ peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, ma
       slice_head(n = 1)
     }
 
-  peaks$good <- peaks$pos %in% good_peaks$pos
-
   if(show_peaks){
+    peaks$good <- peaks$pos %in% good_peaks$pos
     p <- ggplot(data = tst1, aes(x = `Position(mm)`, y = Absorbance)) +
       geom_line() +
       geom_point(data = peaks, aes(x = pos, y = X1, color = good), size = 3) +
