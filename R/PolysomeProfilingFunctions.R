@@ -170,16 +170,25 @@ peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, ma
   tst1$Absorbance <- predict(fit.abs, x = tst1$`Position(mm)`)$y
 
   tst1$Absorbance <- tst1$Absorbance + abs(min(tst1$Absorbance))
-  peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}')
-  peaks <- data.frame(peaks)
-  peaks$pos <- tst1$`Position(mm)`[peaks$X2]
+  peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}', sortstr=TRUE)
+  
+  if (!is.null(peaks) && nrow(peaks) > 0) {
+    peaks <- data.frame(peaks)
+    peaks$pos <- tst1$`Position(mm)`[peaks$X2]
+  
+    good_peaks <- peaks %>%
+      filter(pos > minPeakPos, pos < maxPeakPos, X1 > minAbs) %>%
+      rename(absorb = X1) %>%
+      slice_head(n = npeaks)
+    } else {
+    good_peaks <- tst1 %>%
+      filter(`Position(mm)` > minPeakPos, `Position(mm)` < maxPeakPos) %>%
+      arrange(Absorbance) %>%
+      mutate(absorb = Absorbance) %>%
+      slice_head(n = 1)
+    }
 
-  good_peaks <- peaks %>%
-    filter(pos > minPeakPos, pos < maxPeakPos, X1 > minAbs) %>%
-    rename(absorb = X1) %>%
-    slice_head(n = npeaks)
-
-  peaks$good <- do.call(paste0, peaks) %in% do.call(paste0, good_peaks)
+  peaks$good <- peaks$pos %in% good_peaks$pos
 
   if(show_peaks){
     p <- ggplot(data = tst1, aes(x = `Position(mm)`, y = Absorbance)) +
