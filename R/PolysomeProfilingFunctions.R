@@ -1,3 +1,9 @@
+gaussian_kernel <- function(size = 20, sigma = 2) {
+  x <- seq(-size, size, length.out = 2*size + 1)
+  k <- exp(-x^2 / (2 * sigma^2))
+  k / sum(k)  # normalize
+}
+
 normalize <- function(dtf, max_abs = Inf, pos_start = 7,
                       pos_end = 67, pos_offset = 0,
                       to = 'AUC', max_jump = Inf,
@@ -14,11 +20,13 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
     filter(dtf2$dAbs < max_jump) %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
 
-  if (smoothen) {
-    dtf2$Absorbance <- whittaker(dtf2$Absorbance, lambda = 1600, d = 2)
-    dtf2 <- dtf2 %>%
-      mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
-  }
+if (smoothen) {
+  k <- gaussian_kernel()
+  dtf2$Absorbance <- stats::filter(dtf2$Absorbance, k, sides = 2)
+  
+  dtf2 <- dtf2 %>%
+    mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
+}
 
 
   if(to == '80S'){
@@ -167,7 +175,8 @@ PrismExport2 <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Abso
 
 peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46, minAbs = 0){
   tst1 <- dtf
-  tst1$Absorbance <- whittaker(tst1$Absorbance, lambda = 1600, d = 2)
+  k <- gaussian_kernel()
+  tst1$Absorbance <- stats::filter(tst1$Absorbance, k, sides = 2)
   tst1 <- tst1 %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
   peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}', sortstr=TRUE)
