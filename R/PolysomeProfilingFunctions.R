@@ -22,7 +22,7 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
 
 if (smoothen) {
   k <- gaussian_kernel()
-  dtf2$Absorbance <- stats::filter(dtf2$Absorbance, k, sides = 2)
+  dtf2$Absorbance <- as.numeric(stats::filter(dtf2$Absorbance, k, sides = 2))
   dtf2 <- dtf2 %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
   dtf2$Absorbance[is.na(dtf2$Absorbance)] <- 0
@@ -176,7 +176,7 @@ PrismExport2 <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Abso
 peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46, minAbs = 0){
   tst1 <- dtf
   k <- gaussian_kernel()
-  tst1$Absorbance <- stats::filter(tst1$Absorbance, k, sides = 2)
+  tst1$Absorbance <- as.numeric(stats::filter(tst1$Absorbance, k, sides = 2))
   tst1$Absorbance[is.na(tst1$Absorbance)] <- 0
   tst1 <- tst1 %>%
     mutate(Absorbance = Absorbance - min(Absorbance))
