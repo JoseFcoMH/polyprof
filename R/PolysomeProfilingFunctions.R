@@ -167,7 +167,7 @@ PrismExport2 <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Abso
 
 peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46, minAbs = 0){
   tst1 <- dtf
-  tst1$Absorbance <- whittaker(dtf2$Absorbance, lambda = 1600, d = 2)
+  tst1$Absorbance <- whittaker(tst1$Absorbance, lambda = 1600, d = 2)
   tst1 <- tst1 %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
   peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}', sortstr=TRUE)
