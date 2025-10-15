@@ -10,14 +10,14 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
                       smoothen = TRUE, zero_baseline = TRUE){
 
   dtf2 <- dtf %>%
-    filter(`Position(mm)` > pos_start) %>%
-    filter(`Position(mm)` < pos_end) %>%
+    dplyr::filter(`Position(mm)` > pos_start) %>%
+    dplyr::filter(`Position(mm)` < pos_end) %>%
     mutate(`Position(mm)` = `Position(mm)` + pos_offset)
 
   dtAbs <- abs(dtf2$Absorbance[1:length(dtf2$Absorbance)-1] - dtf2$Absorbance[2:length(dtf2$Absorbance)])
   dtf2$dAbs <- append(dtAbs, 0)
   dtf2 <- dtf2 %>%
-    filter(dtf2$dAbs < max_jump) %>%
+    dplyr::filter(dtf2$dAbs < max_jump) %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
 
 if (smoothen) {
@@ -102,9 +102,9 @@ PolyMonoRatio <- function(dtf, mono_start=29, mono_end=37, poly_start=mono_end, 
   }
 
   dtf_mono <- dtf %>%
-    filter(`Position(mm)` > mono_start & `Position(mm)` < mono_end)
+    dplyr::filter(`Position(mm)` > mono_start & `Position(mm)` < mono_end)
   dtf_poly <- dtf %>%
-    filter(`Position(mm)` > poly_start & `Position(mm)` < poly_end)
+    dplyr::filter(`Position(mm)` > poly_start & `Position(mm)` < poly_end)
 
   if(show_cutoffs){
     print(p + geom_hline(yintercept = 0, color = 'black'))
