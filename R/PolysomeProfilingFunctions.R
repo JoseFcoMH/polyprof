@@ -187,14 +187,15 @@ peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, ma
     peaks$pos <- tst1$`Position(mm)`[peaks$X2]
   
     good_peaks <- peaks %>%
-      filter(pos > minPeakPos, pos < maxPeakPos, X1 > minAbs) %>%
+      dplyr::filter(pos > minPeakPos, pos < maxPeakPos, X1 > minAbs) %>%
       rename(absorb = X1) %>%
       slice_head(n = npeaks)
     } else {
     good_peaks <- tst1 %>%
-      filter(`Position(mm)` > minPeakPos, `Position(mm)` < maxPeakPos) %>%
+      mutate(absorb = Absorbance,
+             X2 = row_number()) %>%
+      dplyr::filter(`Position(mm)` > minPeakPos, `Position(mm)` < maxPeakPos) %>%
       arrange(desc(Absorbance)) %>%
-      mutate(absorb = Absorbance) %>%
       slice_head(n = 1)
     }
 
