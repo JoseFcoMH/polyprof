@@ -15,8 +15,7 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
 
   if (smoothen) {
-    sigma <- 20
-    dtf2$Absorbance <- gaussfilt(dtf2$Absorbance, sigma)
+    dtf2$Absorbance <- whittaker(dtf2$Absorbance, lambda = 1600, d = 2)
     dtf2 <- dtf2 %>%
       mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
   }
@@ -168,8 +167,7 @@ PrismExport2 <- function(dtf, wider_names = c('Sample_ID'), wider_vals = c('Abso
 
 peak_finder <- function(dtf, npeaks = 1, show_peaks = FALSE, minPeakPos = 26, maxPeakPos = 46, minAbs = 0){
   tst1 <- dtf
-  sigma <- 20
-  tst1$Absorbance <- gaussfilt(tst1$Absorbance, sigma)
+  tst1$Absorbance <- whittaker(dtf2$Absorbance, lambda = 1600, d = 2)
   tst1 <- tst1 %>%
     mutate(Absorbance = Absorbance - min(Absorbance) * zero_baseline)
   peaks <- findpeaks(tst1$Absorbance, peakpat = '[+]{30,}[-]{30,}', sortstr=TRUE)
