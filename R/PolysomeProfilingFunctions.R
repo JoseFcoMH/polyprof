@@ -1,4 +1,4 @@
-gaussian_kernel <- function(size = 20, sigma = 2) {
+gaussian_kernel <- function(size = 100, sigma = 6) {
   x <- seq(-size, size, length.out = 2*size + 1)
   k <- exp(-x^2 / (2 * sigma^2))
   k / sum(k)  # normalize
@@ -7,7 +7,8 @@ gaussian_kernel <- function(size = 20, sigma = 2) {
 normalize <- function(dtf, max_abs = Inf, pos_start = 7,
                       pos_end = 67, pos_offset = 0,
                       to = 'AUC', max_jump = Inf,
-                      smoothen = TRUE, zero_baseline = TRUE){
+                      smoothen = TRUE, zero_baseline = TRUE,
+                      gauss_sigma = 3, gauss_window = 100){
 
   dtf2 <- dtf %>%
     dplyr::filter(`Position(mm)` > pos_start) %>%
@@ -22,7 +23,7 @@ normalize <- function(dtf, max_abs = Inf, pos_start = 7,
 
 if (smoothen) {
   min_absorbance = min(dtf2$Absorbance)
-  k <- gaussian_kernel()
+  k <- gaussian_kernel(size = gauss_window, sigma = gauss_sigma)
   dtf2$Absorbance <- as.numeric(stats::filter(dtf2$Absorbance, k, sides = 2))
   dtf2 <- dtf2 %>%
     mutate(Absorbance = Absorbance - min_absorbance * zero_baseline)
